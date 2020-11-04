@@ -33,7 +33,7 @@ module alu_shifter (
         
       b11:
         //right shift with wign extension
-        result = $signed(a)>>>shift_amount;
+        result = $signed(a) >>> shift_amount;
       
       b10:
         //hijack this unused shift code to route to the multiply function instead

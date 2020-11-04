@@ -2,7 +2,6 @@ module display_manager (
     input displayToggle,
     input mode[2],
     input alufn[6],
-    input test_pass,
     input view_zvn,
     input t,
     input z,
@@ -17,7 +16,7 @@ module display_manager (
   const LETTER_C = 7b1011000;
   const LETTER_D = 7b1011110;
   const LETTER_E = 7b1111001;
-  const LETTER_F = 7b1110001;
+  //const LETTER_F = 7b1110001;
   //const LETTER_G = 7b0111101;
   const LETTER_H = 7b1110100;
   const LETTER_I = 7b0000110;
@@ -39,9 +38,19 @@ module display_manager (
   const LETTER_DASH = 7b1000000;
   
   always {
+  
+    if(view_zvn && (mode == 1 || mode == 2)){
+      //if we actually care about the zvn result (what the t variable is), then show the result.
+      if(t){
+        display_output = {LETTER_, z? LETTER_Z: LETTER_, v? LETTER_V: LETTER_, n? LETTER_N: LETTER_};
+      }
+      else{
+        display_output = {LETTER_, LETTER_DASH, LETTER_DASH, LETTER_DASH};
+      }
+    }
     
-    if(displayToggle){
-      //show the alufn codes
+    else if(displayToggle || mode == 3){
+      //show the alufn codes if we are checking them or we are in auto mode
       case(alufn){
         6b000000:
           //add
@@ -100,16 +109,7 @@ module display_manager (
       }
       
     }
-    else if(view_zvn){
-      //if we actually care about the zvn result (what the t variable is), then show the result.
-      if(t){
-        display_output = {LETTER_, z? LETTER_Z: LETTER_, v? LETTER_V: LETTER_, n? LETTER_N: LETTER_};
-      }
-      else{
-        display_output = {LETTER_, LETTER_DASH, LETTER_DASH, LETTER_DASH};
-      }
-    }
-    
+
     else{
       //show the current mode
       case(mode){
@@ -122,16 +122,6 @@ module display_manager (
         2:
           //out
           display_output = {LETTER_, LETTER_O, LETTER_U, LETTER_T};
-        3:
-          //auto
-          //display_output = {LETTER_A, LETTER_U, LETTER_T, LETTER_O};
-          if(test_pass){
-            display_output = {LETTER_P, LETTER_A, LETTER_S, LETTER_S};
-          }
-          else{
-            display_output = {LETTER_F, LETTER_A, LETTER_I, LETTER_L};
-          }
-
           
       }
     }

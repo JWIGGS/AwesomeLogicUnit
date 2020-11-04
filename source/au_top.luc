@@ -88,7 +88,31 @@ module au_top (
     //xor
     {16b1010101010101010, 16b1100110011001100, 16b0110011001100110},
     //ldr ("A")
-    {16b1010101010101010, 16b1100110011001100, 16b1010101010101010}
+    {16b1010101010101010, 16b1100110011001100, 16b1010101010101010},
+    
+    //= cmpeq true
+    {16b1010101010101010, 16b1010101010101010, 16b0000000000000001},
+    //= cmpeq false
+    {16b1010101010101010, 16b1010101010101000, 16b0000000000000000},
+    //< cmplt true
+    {16b0000000000000001, 16b0100000000000000, 16b0000000000000001},
+    //< cmplt false
+    {16b0100000000000000, 16b0000000000000001, 16b0000000000000000},
+    //<= cmple true
+    {16b0100000000000000, 16b0100000000000000, 16b0000000000000001},
+    //<= cmple false
+    {16b0100000000000000, 16b0000000000000001, 16b0000000000000000},
+    
+    //shl
+    {16b0000111100001111, 16b0000000000000011, 16b0111100001111000},
+    //shr
+    {16b0000111100001111, 16b0000000000000011, 16b0000000111100001},
+    //sra
+    {16b0000111100001111, 16b0000000000000011, 16b0000000111100001},
+    //sra
+    {16b1000111100001111, 16b0000000000000011, 16b1111000111100001},
+    //mul
+    {16b0000000010101010, 16b0000000011001100, 16b1000011101111000}
   };
   
   //test case alufn is to store the alufn code provided to the alu
@@ -102,7 +126,20 @@ module au_top (
     {6b011000}, //and
     {6b011110}, //or
     {6b010110}, //xor
-    {6b011010} //ldr ("A")
+    {6b011010}, //ldr ("A")
+    
+    {6b110011}, //= cmpeq
+    {6b110011}, //= cmpeq
+    {6b110101}, //< cmplt
+    {6b110101}, //< cmplt
+    {6b110111}, //<= cmple
+    {6b110111}, //<= cmple
+    
+    {6b100000}, //shl
+    {6b100001}, //shr
+    {6b100011}, //sra
+    {6b100011}, //sra
+    {6b100010} //mul
         
   };
   
@@ -114,17 +151,31 @@ module au_top (
     {1, 0, 1, 1}, //add
     {1, 0, 0, 1}, //sub
     {1, 0, 1, 1}, //sub
+    
     //past this point we dont care about zvn
     {0, 0, 0, 0}, //and
     {0, 0, 0, 0}, //or
     {0, 0, 0, 0}, //xor
-    {0, 0, 0, 0} //ldr ("A")
+    {0, 0, 0, 0}, //ldr ("A")
+    
+    {0, 0, 0, 0}, //= cmpeq
+    {0, 0, 0, 0}, //= cmpeq
+    {0, 0, 0, 0}, //< cmplt
+    {0, 0, 0, 0}, //< cmplt
+    {0, 0, 0, 0}, //<= cmple
+    {0, 0, 0, 0}, //<= cmple
+    
+    {0, 0, 0, 0}, //shl
+    {0, 0, 0, 0}, //shr
+    {0, 0, 0, 0}, //sra
+    {0, 0, 0, 0}, //sra
+    {0, 0, 0, 0} //mul
     
   };
   
   
   //define here the number of test cases provided above
-  const TEST_CASE_AMOUNT = 8;
+  const TEST_CASE_AMOUNT = 19;
   
   
   //how long to wait on each test case before going to the next test case
@@ -132,10 +183,11 @@ module au_top (
   const TEST_CASE_DELAY_TIME = 28;
   
   dff test_case_delay[TEST_CASE_DELAY_TIME](.clk(clk), .rst(rst));
+  dff test_case_paused(.clk(clk), .rst(rst));
   dff current_test[$clog2(TEST_CASE_AMOUNT)](.clk(clk), .rst(rst));
   
   //create signal variables to 
-  sig checkResult, checkT, checkZ, checkV, checkN;
+  sig checkResult, checkT, checkZ, checkV, checkN, testPass;
   
   
   
@@ -168,34 +220,6 @@ module au_top (
     io_led = 3x{{8h00}};
 
     
-    //---------------------------------------HANDLE DISPLAY MANAGER---------------------------------------//
-    
-    //our seven segment displays can only be addressed one at a time
-    //so in order to assign a value to all of them, we are very quickly looking at each one and giving it a value
-    
-    
-    //the io_display_counter is a 2 bit counter that will iterate through and select values 0, 1, 2 and 3 sequentially
-    //we then plug the counter value into a decoder, which will give us a 1000 or 0100 or 0010 or 0001 depending on the value of the counter
-    //because the segment display is weird, a 1 means not selected and a 0 means selected, so we invert (~) the output of the decoder
-    io_display_decoder.in = io_display_counter.value;
-    io_sel = ~io_display_decoder.out;
-    
-    
-    //the display manager determines the value that we want to show provided a few arguments
-    //if display toggle is 1, then the values shown are based on the current mode
-    //if display toggle is 1, then the values shown are based on the alufn codes 
-    io_display_manager.displayToggle = io_button[BUTTON_DOWN];
-    io_display_manager.mode = mode.q;
-    
-    
-    //the view ZVN are shown as outputs in the display manager
-    io_display_manager.view_zvn = io_button[BUTTON_UP];
-    
-    //because the segment display is weird, 1 means that the segment is turned off, so we invert (~) the output of the display
-    //the segment we are assigning is based on the display counter value such that when a segment is selected, we are writing that value of the segment as well
-    io_seg = ~io_display_manager.display_output[io_display_counter.value];
-    
-
     
     //---------------------------------------HANDLE BUTTON PRESSES---------------------------------------//
     
@@ -246,7 +270,8 @@ module au_top (
         
         //the results are compiled and sent to the display manager to show PASS or FAIL
         //if check T is true, then the pass check will rely on ZVN checks. if not, then it just relies on the result check.
-        io_display_manager.test_pass = (checkT? (checkResult && checkZ && checkV && checkN): (checkResult));
+        testPass = (checkT? (checkResult && checkZ && checkV && checkN): (checkResult));
+        
         
         //send the results if ZVN are correct to the display manager
         //so if the Z is correct, it will be shown etc.
@@ -275,7 +300,7 @@ module au_top (
         
         //set the test pass to zero, indicating failure
         //it doesnt really matter because the test pass is only used for auto testing, so this i just the default
-        io_display_manager.test_pass = 0;
+        testPass = 0;
         
         //pass the ZVN values to the display manager so that it can view them
         io_display_manager.z = function_alu.z;
@@ -331,9 +356,39 @@ module au_top (
         //display the current test case as binary on the leds
         //the display numbers are reversed so as to make it easier when counting the test case
         io_led[0] = TEST_CASE_AMOUNT - 1 - current_test.q;
-        io_led[1] = 8h00;
-        io_led[2] = 8h00;
+        io_led[1] = testPass? 8hff: 8h00;
+        io_led[2] = testPass? 8hff: 8h00;
     }
+    
+    
+    //---------------------------------------HANDLE DISPLAY MANAGER---------------------------------------//
+    
+    //our seven segment displays can only be addressed one at a time
+    //so in order to assign a value to all of them, we are very quickly looking at each one and giving it a value
+    
+    
+    //the io_display_counter is a 2 bit counter that will iterate through and select values 0, 1, 2 and 3 sequentially
+    //we then plug the counter value into a decoder, which will give us a 1000 or 0100 or 0010 or 0001 depending on the value of the counter
+    //because the segment display is weird, a 1 means not selected and a 0 means selected, so we invert (~) the output of the decoder
+    io_display_decoder.in = io_display_counter.value;
+    io_sel = ~io_display_decoder.out;
+    
+    
+    //the display manager determines the value that we want to show provided a few arguments
+    //if display toggle is 1, then the values shown are based on the current mode
+    //if display toggle is 1, then the values shown are based on the alufn codes 
+    io_display_manager.displayToggle = io_button[BUTTON_DOWN];
+    io_display_manager.mode = mode.q;
+    
+    
+    //the view ZVN are shown as outputs in the display manager
+    io_display_manager.view_zvn = io_button[BUTTON_UP];
+    
+    //because the segment display is weird, 1 means that the segment is turned off, so we invert (~) the output of the display
+    //the segment we are assigning is based on the display counter value such that when a segment is selected, we are writing that value of the segment as well
+    io_seg = ~io_display_manager.display_output[io_display_counter.value];
+    
+
     
 
     //---------------------------------------HANDLE BUTTON ACTIONS---------------------------------------//
@@ -350,21 +405,31 @@ module au_top (
       mode.d = mode.q-1;
     }
 
-    //middle button press save values
+    //middle button press
     if(io_button_pressed.q[BUTTON_MIDDLE]){
       io_button_pressed.d[BUTTON_MIDDLE] = 0;
-
-      //save value of switches to value A or B
-      case (mode.q){
-        0:
-          //MODE: set A stores the current value of the switches to A
-          store_valueA.d = $flatten(io_dip[2:1]);
-        1:
-          store_valueB.d = $flatten(io_dip[2:1]);
+      
+      
+      if(mode.q == 3){
+        //toggle the pause function
+        
+        test_case_paused.d = ~test_case_paused.q;
+        
       }
-
-      //save value of switches to alufn
-      store_alufn.d = io_dip[0][5:0];
+      else{
+        //save value of switches to value A or B
+        case (mode.q){
+          0:
+            store_valueA.d = $flatten(io_dip[2:1]);
+          1:
+            store_valueB.d = $flatten(io_dip[2:1]);
+        }
+  
+        //save value of switches to alufn
+        store_alufn.d = io_dip[0][5:0];
+          
+      }
+        
     }
     
     
@@ -372,20 +437,23 @@ module au_top (
     //---------------------------------------HANDLE AUTOMATIC TEST CASE STATE MACHINE---------------------------------------//
     
     
-    //keep incrementing the delay
-    test_case_delay.d = test_case_delay.q+1;
-    
-    //once the highest bit of the delay reaches 1, we reset the delay
-    if(test_case_delay.q[TEST_CASE_DELAY_TIME-1]){
-      test_case_delay.d = 0;
+    //if the test case is not paused
+    if(~test_case_paused.q){
+      //keep incrementing the delay
+      test_case_delay.d = test_case_delay.q+1;
       
-      //if we are at the last test case, move back to the first test case
-      //else, keep incrementing through the test cases
-      if(current_test.q +1 >= TEST_CASE_AMOUNT){
-        current_test.d = 0;
-      }
-      else{
-        current_test.d = current_test.q + 1;
+      //once the highest bit of the delay reaches 1, we reset the delay
+      if(test_case_delay.q[TEST_CASE_DELAY_TIME-1]){
+        test_case_delay.d = 0;
+        
+        //if we are at the last test case, move back to the first test case
+        //else, keep incrementing through the test cases
+        if(current_test.q +1 >= TEST_CASE_AMOUNT){
+          current_test.d = 0;
+        }
+        else{
+          current_test.d = current_test.q + 1;
+        }
       }
     }
     

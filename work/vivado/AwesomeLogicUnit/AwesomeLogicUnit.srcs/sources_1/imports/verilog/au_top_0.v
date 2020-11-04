@@ -63,7 +63,6 @@ module au_top_0 (
   reg [1-1:0] M_io_display_manager_displayToggle;
   reg [2-1:0] M_io_display_manager_mode;
   reg [6-1:0] M_io_display_manager_alufn;
-  reg [1-1:0] M_io_display_manager_test_pass;
   reg [1-1:0] M_io_display_manager_view_zvn;
   reg [1-1:0] M_io_display_manager_t;
   reg [1-1:0] M_io_display_manager_z;
@@ -73,7 +72,6 @@ module au_top_0 (
     .displayToggle(M_io_display_manager_displayToggle),
     .mode(M_io_display_manager_mode),
     .alufn(M_io_display_manager_alufn),
-    .test_pass(M_io_display_manager_test_pass),
     .view_zvn(M_io_display_manager_view_zvn),
     .t(M_io_display_manager_t),
     .z(M_io_display_manager_z),
@@ -92,25 +90,28 @@ module au_top_0 (
   
   reg [15:0] M_store_valueOut_d, M_store_valueOut_q = 1'h0;
   
-  localparam TEST_CASE_INOUT = 384'h00aa00ff01a940004000800000aa00ffffab7530d8f09c40aaaacccc8888aaaacccceeeeaaaacccc6666aaaaccccaaaa;
+  localparam TEST_CASE_INOUT = 912'h00aa00ff01a940004000800000aa00ffffab7530d8f09c40aaaacccc8888aaaacccceeeeaaaacccc6666aaaaccccaaaaaaaaaaaa0001aaaaaaa800000001400000014000000100004000400000014000000100000f0f000378780f0f000301e10f0f000301e18f0f0003f1e100aa00cc8778;
   
-  localparam TEST_CASE_ALUFN = 48'h00004161e59a;
+  localparam TEST_CASE_ALUFN = 114'h000010587966b3cf5d77de08638e2;
   
-  localparam TEST_CASE_TZVN = 32'h8b9b0000;
+  localparam TEST_CASE_TZVN = 76'h8b9b000000000000000;
   
-  localparam TEST_CASE_AMOUNT = 4'h8;
+  localparam TEST_CASE_AMOUNT = 5'h13;
   
   localparam TEST_CASE_DELAY_TIME = 5'h1c;
   
   reg [27:0] M_test_case_delay_d, M_test_case_delay_q = 1'h0;
   
-  reg [2:0] M_current_test_d, M_current_test_q = 1'h0;
+  reg M_test_case_paused_d, M_test_case_paused_q = 1'h0;
+  
+  reg [4:0] M_current_test_d, M_current_test_q = 1'h0;
   
   reg checkResult;
   reg checkT;
   reg checkZ;
   reg checkV;
   reg checkN;
+  reg testPass;
   
   wire [16-1:0] M_function_alu_result;
   wire [1-1:0] M_function_alu_z;
@@ -139,18 +140,13 @@ module au_top_0 (
     M_current_test_d = M_current_test_q;
     M_io_button_pressed_d = M_io_button_pressed_q;
     M_store_valueOut_d = M_store_valueOut_q;
+    M_test_case_paused_d = M_test_case_paused_q;
     
     M_reset_cond_in = ~rst_n;
     rst = M_reset_cond_out;
     usb_tx = usb_rx;
     led = 8'h00;
     io_led = 24'h000000;
-    M_io_display_decoder_in = M_io_display_counter_value;
-    io_sel = ~M_io_display_decoder_out;
-    M_io_display_manager_displayToggle = io_button[2+0-:1];
-    M_io_display_manager_mode = M_mode_q;
-    M_io_display_manager_view_zvn = io_button[0+0-:1];
-    io_seg = ~M_io_display_manager_display_output[(M_io_display_counter_value)*7+6-:7];
     for (i = 1'h0; i < 3'h5; i = i + 1) begin
       if (io_button[(i)*1+0-:1]) begin
         if (M_io_button_ready_q[(i)*1+0-:1]) begin
@@ -174,7 +170,7 @@ module au_top_0 (
         checkZ = M_function_alu_z == TEST_CASE_TZVN[(M_current_test_q)*4+2+0-:1];
         checkV = M_function_alu_v == TEST_CASE_TZVN[(M_current_test_q)*4+1+0-:1];
         checkN = M_function_alu_n == TEST_CASE_TZVN[(M_current_test_q)*4+0+0-:1];
-        M_io_display_manager_test_pass = (checkT ? (checkResult && checkZ && checkV && checkN) : (checkResult));
+        testPass = (checkT ? (checkResult && checkZ && checkV && checkN) : (checkResult));
         M_io_display_manager_z = checkZ;
         M_io_display_manager_v = checkV;
         M_io_display_manager_n = checkN;
@@ -186,7 +182,7 @@ module au_top_0 (
         M_function_alu_alufn = M_store_alufn_q;
         M_store_valueOut_d = M_function_alu_result;
         M_io_display_manager_alufn = M_store_alufn_q;
-        M_io_display_manager_test_pass = 1'h0;
+        testPass = 1'h0;
         M_io_display_manager_z = M_function_alu_z;
         M_io_display_manager_v = M_function_alu_v;
         M_io_display_manager_n = M_function_alu_n;
@@ -211,11 +207,17 @@ module au_top_0 (
         io_led[0+7-:8] = M_store_alufn_q;
       end
       2'h3: begin
-        io_led[0+7-:8] = 5'h07 - M_current_test_q;
-        io_led[8+7-:8] = 8'h00;
-        io_led[16+7-:8] = 8'h00;
+        io_led[0+7-:8] = 6'h12 - M_current_test_q;
+        io_led[8+7-:8] = testPass ? 8'hff : 8'h00;
+        io_led[16+7-:8] = testPass ? 8'hff : 8'h00;
       end
     endcase
+    M_io_display_decoder_in = M_io_display_counter_value;
+    io_sel = ~M_io_display_decoder_out;
+    M_io_display_manager_displayToggle = io_button[2+0-:1];
+    M_io_display_manager_mode = M_mode_q;
+    M_io_display_manager_view_zvn = io_button[0+0-:1];
+    io_seg = ~M_io_display_manager_display_output[(M_io_display_counter_value)*7+6-:7];
     if (M_io_button_pressed_q[4+0-:1]) begin
       M_io_button_pressed_d[4+0-:1] = 1'h0;
       M_mode_d = M_mode_q + 1'h1;
@@ -226,51 +228,39 @@ module au_top_0 (
     end
     if (M_io_button_pressed_q[1+0-:1]) begin
       M_io_button_pressed_d[1+0-:1] = 1'h0;
-      
-      case (M_mode_q)
-        1'h0: begin
-          M_store_valueA_d = io_dip[8+15-:16];
-        end
-        1'h1: begin
-          M_store_valueB_d = io_dip[8+15-:16];
-        end
-      endcase
-      M_store_alufn_d = io_dip[0+0+5-:6];
-    end
-    M_test_case_delay_d = M_test_case_delay_q + 1'h1;
-    if (M_test_case_delay_q[27+0-:1]) begin
-      M_test_case_delay_d = 1'h0;
-      if (M_current_test_q + 1'h1 >= 4'h8) begin
-        M_current_test_d = 1'h0;
+      if (M_mode_q == 2'h3) begin
+        M_test_case_paused_d = ~M_test_case_paused_q;
       end else begin
-        M_current_test_d = M_current_test_q + 1'h1;
+        
+        case (M_mode_q)
+          1'h0: begin
+            M_store_valueA_d = io_dip[8+15-:16];
+          end
+          1'h1: begin
+            M_store_valueB_d = io_dip[8+15-:16];
+          end
+        endcase
+        M_store_alufn_d = io_dip[0+0+5-:6];
+      end
+    end
+    if (~M_test_case_paused_q) begin
+      M_test_case_delay_d = M_test_case_delay_q + 1'h1;
+      if (M_test_case_delay_q[27+0-:1]) begin
+        M_test_case_delay_d = 1'h0;
+        if (M_current_test_q + 1'h1 >= 5'h13) begin
+          M_current_test_d = 1'h0;
+        end else begin
+          M_current_test_d = M_current_test_q + 1'h1;
+        end
       end
     end
   end
   
   always @(posedge clk) begin
     if (rst == 1'b1) begin
-      M_io_button_pressed_q <= 1'h0;
+      M_store_alufn_q <= 1'h0;
     end else begin
-      M_io_button_pressed_q <= M_io_button_pressed_d;
-    end
-  end
-  
-  
-  always @(posedge clk) begin
-    if (rst == 1'b1) begin
-      M_store_valueB_q <= 1'h0;
-    end else begin
-      M_store_valueB_q <= M_store_valueB_d;
-    end
-  end
-  
-  
-  always @(posedge clk) begin
-    if (rst == 1'b1) begin
-      M_io_button_ready_q <= 1'h0;
-    end else begin
-      M_io_button_ready_q <= M_io_button_ready_d;
+      M_store_alufn_q <= M_store_alufn_d;
     end
   end
   
@@ -286,9 +276,54 @@ module au_top_0 (
   
   always @(posedge clk) begin
     if (rst == 1'b1) begin
-      M_store_alufn_q <= 1'h0;
+      M_store_valueB_q <= 1'h0;
     end else begin
-      M_store_alufn_q <= M_store_alufn_d;
+      M_store_valueB_q <= M_store_valueB_d;
+    end
+  end
+  
+  
+  always @(posedge clk) begin
+    if (rst == 1'b1) begin
+      M_test_case_delay_q <= 1'h0;
+    end else begin
+      M_test_case_delay_q <= M_test_case_delay_d;
+    end
+  end
+  
+  
+  always @(posedge clk) begin
+    if (rst == 1'b1) begin
+      M_io_button_pressed_q <= 1'h0;
+    end else begin
+      M_io_button_pressed_q <= M_io_button_pressed_d;
+    end
+  end
+  
+  
+  always @(posedge clk) begin
+    if (rst == 1'b1) begin
+      M_test_case_paused_q <= 1'h0;
+    end else begin
+      M_test_case_paused_q <= M_test_case_paused_d;
+    end
+  end
+  
+  
+  always @(posedge clk) begin
+    if (rst == 1'b1) begin
+      M_io_button_ready_q <= 1'h0;
+    end else begin
+      M_io_button_ready_q <= M_io_button_ready_d;
+    end
+  end
+  
+  
+  always @(posedge clk) begin
+    if (rst == 1'b1) begin
+      M_store_valueOut_q <= 1'h0;
+    end else begin
+      M_store_valueOut_q <= M_store_valueOut_d;
     end
   end
   
@@ -307,24 +342,6 @@ module au_top_0 (
       M_mode_q <= 1'h0;
     end else begin
       M_mode_q <= M_mode_d;
-    end
-  end
-  
-  
-  always @(posedge clk) begin
-    if (rst == 1'b1) begin
-      M_store_valueOut_q <= 1'h0;
-    end else begin
-      M_store_valueOut_q <= M_store_valueOut_d;
-    end
-  end
-  
-  
-  always @(posedge clk) begin
-    if (rst == 1'b1) begin
-      M_test_case_delay_q <= 1'h0;
-    end else begin
-      M_test_case_delay_q <= M_test_case_delay_d;
     end
   end
   

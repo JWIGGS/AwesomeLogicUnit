@@ -8,7 +8,6 @@ module display_manager_4 (
     input displayToggle,
     input [1:0] mode,
     input [5:0] alufn,
-    input test_pass,
     input view_zvn,
     input t,
     input z,
@@ -28,8 +27,6 @@ module display_manager_4 (
   localparam LETTER_D = 7'h5e;
   
   localparam LETTER_E = 7'h79;
-  
-  localparam LETTER_F = 7'h71;
   
   localparam LETTER_H = 7'h74;
   
@@ -64,59 +61,59 @@ module display_manager_4 (
   localparam LETTER_DASH = 7'h40;
   
   always @* begin
-    if (displayToggle) begin
-      
-      case (alufn)
-        6'h00: begin
-          display_output = 28'h01def5e;
-        end
-        6'h01: begin
-          display_output = 28'h01b4e7c;
-        end
-        6'h18: begin
-          display_output = 28'h01dea5e;
-        end
-        6'h1e: begin
-          display_output = 28'h0002e50;
-        end
-        6'h16: begin
-          display_output = 28'h01dae50;
-        end
-        6'h1a: begin
-          display_output = 28'h00e2f50;
-        end
-        6'h20: begin
-          display_output = 28'h01b7a38;
-        end
-        6'h21: begin
-          display_output = 28'h01b7a50;
-        end
-        6'h23: begin
-          display_output = 28'h01b6877;
-        end
-        6'h33: begin
-          display_output = 28'hb1cfce7;
-        end
-        6'h35: begin
-          display_output = 28'hb1cdc78;
-        end
-        6'h37: begin
-          display_output = 28'hb1cdc79;
-        end
-        6'h22: begin
-          display_output = 28'ha150e38;
-        end
-        default: begin
-          display_output = 28'h01e6850;
-        end
-      endcase
+    if (view_zvn && (mode == 1'h1 || mode == 2'h2)) begin
+      if (t) begin
+        display_output = {7'h00, z ? 7'h5b : 7'h00, v ? 7'h3e : 7'h00, n ? 7'h54 : 7'h00};
+      end else begin
+        display_output = 28'h0102040;
+      end
     end else begin
-      if (view_zvn) begin
-        if (t) begin
-          display_output = {7'h00, z ? 7'h5b : 7'h00, v ? 7'h3e : 7'h00, n ? 7'h54 : 7'h00};
-        end else begin
-          display_output = 28'h0102040;
-        end
+      if (displayToggle || mode == 2'h3) begin
+        
+        case (alufn)
+          6'h00: begin
+            display_output = 28'h01def5e;
+          end
+          6'h01: begin
+            display_output = 28'h01b4e7c;
+          end
+          6'h18: begin
+            display_output = 28'h01dea5e;
+          end
+          6'h1e: begin
+            display_output = 28'h0002e50;
+          end
+          6'h16: begin
+            display_output = 28'h01dae50;
+          end
+          6'h1a: begin
+            display_output = 28'h00e2f50;
+          end
+          6'h20: begin
+            display_output = 28'h01b7a38;
+          end
+          6'h21: begin
+            display_output = 28'h01b7a50;
+          end
+          6'h23: begin
+            display_output = 28'h01b6877;
+          end
+          6'h33: begin
+            display_output = 28'hb1cfce7;
+          end
+          6'h35: begin
+            display_output = 28'hb1cdc78;
+          end
+          6'h37: begin
+            display_output = 28'hb1cdc79;
+          end
+          6'h22: begin
+            display_output = 28'ha150e38;
+          end
+          default: begin
+            display_output = 28'h01e6850;
+          end
+        endcase
       end else begin
         
         case (mode)
@@ -128,13 +125,6 @@ module display_manager_4 (
           end
           2'h2: begin
             display_output = 28'h0170e78;
-          end
-          2'h3: begin
-            if (test_pass) begin
-              display_output = 28'he7df6ed;
-            end else begin
-              display_output = 28'he3dc338;
-            end
           end
         endcase
       end

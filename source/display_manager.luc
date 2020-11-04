@@ -1,0 +1,144 @@
+module display_manager (
+    input displayToggle,
+    input mode[2],
+    input alufn[6],
+    input test_pass,
+    input view_zvn,
+    input t,
+    input z,
+    input v,
+    input n,
+    output display_output[4][7]
+  ) {
+  
+  //constants for letters to plug into io_display_value
+  const LETTER_A = 7b1110111;
+  const LETTER_B = 7b1111100;
+  const LETTER_C = 7b1011000;
+  const LETTER_D = 7b1011110;
+  const LETTER_E = 7b1111001;
+  const LETTER_F = 7b1110001;
+  //const LETTER_G = 7b0111101;
+  const LETTER_H = 7b1110100;
+  const LETTER_I = 7b0000110;
+  //const LETTER_J = 7b0011110;
+  const LETTER_L = 7b0111000;
+  const LETTER_N = 7b1010100;
+  const LETTER_O = 7b1011100;
+  const LETTER_P = 7b1110011;
+  const LETTER_Q = 7b1100111;
+  const LETTER_R = 7b1010000;
+  const LETTER_S = 7b1101101;
+  const LETTER_T = 7b1111000;
+  const LETTER_U = 7b0011100;
+  const LETTER_V = 7b0111110;
+  const LETTER_X = 7b1110110;
+  //const LETTER_Y = 7b1101110;
+  const LETTER_Z = 7b1011011;
+  const LETTER_ = 7b0000000;
+  const LETTER_DASH = 7b1000000;
+  
+  always {
+    
+    if(displayToggle){
+      //show the alufn codes
+      case(alufn){
+        6b000000:
+          //add
+          display_output = {LETTER_, LETTER_A, LETTER_D, LETTER_D};
+          
+        6b000001:
+          //sub
+          display_output = {LETTER_, LETTER_S, LETTER_U, LETTER_B};
+          
+        6b011000:
+          //and
+          display_output = {LETTER_, LETTER_A, LETTER_N, LETTER_D};
+          
+        6b011110:
+          //or
+          display_output = {LETTER_, LETTER_, LETTER_O, LETTER_R};
+          
+        6b010110:
+          //xor
+          display_output = {LETTER_, LETTER_X, LETTER_O, LETTER_R};
+          
+        6b011010:
+          //ldr
+          display_output = {LETTER_, LETTER_L, LETTER_D, LETTER_R};
+          
+        6b100000:
+          //shl
+          display_output = {LETTER_, LETTER_S, LETTER_H, LETTER_L};
+          
+        6b100001:
+          //shr
+          display_output = {LETTER_, LETTER_S, LETTER_H, LETTER_R};
+          
+        6b100011:
+          //sra
+          display_output = {LETTER_, LETTER_S, LETTER_R, LETTER_A};
+          
+        6b110011:
+          //cmpeq
+          display_output = {LETTER_C, LETTER_P, LETTER_E, LETTER_Q};
+          
+        6b110101:
+          //cmplt
+          display_output = {LETTER_C, LETTER_P, LETTER_L, LETTER_T};
+          
+        6b110111:
+          //cmple
+          display_output = {LETTER_C, LETTER_P, LETTER_L, LETTER_E};
+          
+        6b100010:
+          //mul
+          display_output = {LETTER_R, LETTER_N, LETTER_U, LETTER_L};  
+
+        default:
+          display_output = {LETTER_, LETTER_E, LETTER_R, LETTER_R};
+      }
+      
+    }
+    else if(view_zvn){
+      //if we actually care about the zvn result (what the t variable is), then show the result.
+      if(t){
+        display_output = {LETTER_, z? LETTER_Z: LETTER_, v? LETTER_V: LETTER_, n? LETTER_N: LETTER_};
+      }
+      else{
+        display_output = {LETTER_, LETTER_DASH, LETTER_DASH, LETTER_DASH};
+      }
+    }
+    
+    else{
+      //show the current mode
+      case(mode){
+        0:
+          //a in
+          display_output = {LETTER_A, LETTER_, LETTER_I, LETTER_N};
+        1: 
+          //b in
+          display_output = {LETTER_B, LETTER_, LETTER_I, LETTER_N};
+        2:
+          //out
+          display_output = {LETTER_, LETTER_O, LETTER_U, LETTER_T};
+        3:
+          //auto
+          //display_output = {LETTER_A, LETTER_U, LETTER_T, LETTER_O};
+          if(test_pass){
+            display_output = {LETTER_P, LETTER_A, LETTER_S, LETTER_S};
+          }
+          else{
+            display_output = {LETTER_F, LETTER_A, LETTER_I, LETTER_L};
+          }
+
+          
+      }
+    }
+    
+
+    
+    
+    
+  }
+}

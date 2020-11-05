@@ -1,0 +1,7 @@
+global Button{
+  const UP = 0;
+  const DOWN = 2;
+  const LEFT = 3;
+  const RIGHT = 4;
+  const MIDDLE = 1;
+}

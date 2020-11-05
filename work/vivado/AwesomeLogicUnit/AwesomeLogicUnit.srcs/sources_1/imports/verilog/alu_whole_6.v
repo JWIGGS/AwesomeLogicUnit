@@ -4,7 +4,7 @@
    This is a temporary file and any changes made to it will be destroyed.
 */
 
-module alu_whole_5 (
+module alu_whole_6 (
     input [5:0] alufn,
     input [15:0] a,
     input [15:0] b,
@@ -23,7 +23,7 @@ module alu_whole_5 (
   reg [6-1:0] M_function_addition_alufn;
   reg [16-1:0] M_function_addition_a;
   reg [16-1:0] M_function_addition_b;
-  alu_adder_6 function_addition (
+  alu_adder_7 function_addition (
     .alufn(M_function_addition_alufn),
     .a(M_function_addition_a),
     .b(M_function_addition_b),
@@ -37,7 +37,7 @@ module alu_whole_5 (
   reg [6-1:0] M_function_boolean_alufn;
   reg [16-1:0] M_function_boolean_a;
   reg [16-1:0] M_function_boolean_b;
-  alu_boolean_7 function_boolean (
+  alu_boolean_8 function_boolean (
     .alufn(M_function_boolean_alufn),
     .a(M_function_boolean_a),
     .b(M_function_boolean_b),
@@ -48,7 +48,7 @@ module alu_whole_5 (
   reg [16-1:0] M_function_shifter_a;
   reg [16-1:0] M_function_shifter_b;
   reg [6-1:0] M_function_shifter_alufn;
-  alu_shifter_8 function_shifter (
+  alu_shifter_9 function_shifter (
     .a(M_function_shifter_a),
     .b(M_function_shifter_b),
     .alufn(M_function_shifter_alufn),
@@ -60,7 +60,7 @@ module alu_whole_5 (
   reg [1-1:0] M_function_compare_v;
   reg [1-1:0] M_function_compare_z;
   reg [1-1:0] M_function_compare_n;
-  alu_compare_9 function_compare (
+  alu_compare_10 function_compare (
     .alufn(M_function_compare_alufn),
     .v(M_function_compare_v),
     .z(M_function_compare_z),

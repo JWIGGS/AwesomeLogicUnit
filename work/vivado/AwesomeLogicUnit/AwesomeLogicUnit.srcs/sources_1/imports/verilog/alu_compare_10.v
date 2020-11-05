@@ -4,7 +4,7 @@
    This is a temporary file and any changes made to it will be destroyed.
 */
 
-module alu_compare_9 (
+module alu_compare_10 (
     input [5:0] alufn,
     input v,
     input z,

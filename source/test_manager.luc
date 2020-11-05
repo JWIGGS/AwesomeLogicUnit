@@ -1,0 +1,190 @@
+global TestCases{
+  
+  //define here the maximum number of bits to use for the counters of the test cases
+  //this is given by log2(amount of test cases)
+  const SIZE = 6;
+  
+  
+  //define here the number of test cases provided
+  const AMOUNT = 19;
+}
+
+module test_manager (
+    input clk,
+    input rst,
+    input test_paused,
+    output valueA[16],
+    output valueB[16],
+    output alufn[6],
+    output result[16],
+    output t,
+    output z,
+    output v,
+    output n,
+    output current_case[TestCases.SIZE]
+  ) {
+  
+  
+  //we encode our test cases into three different variables for 
+  //every row corresponds to the same test case (eg row 2 of every variable corresponds to the 2nd test case)
+  
+  //test case inout is to store the 16 bit values of the 2 inputs and the output that the alu will be checked against
+  //format: {valueA, valueB, result}
+  const TEST_CASE_INOUT = {
+    //add
+    {16b0000000010101010, 16b0000000011111111, 16b0000000110101001},
+    //add overflow
+    {16b0100000000000000, 16b0100000000000000, 16b1000000000000000},
+    //sub
+    {16b0000000010101010, 16b0000000011111111, 16b1111111110101011},
+    //sub overflow
+    {16b111010100110000, 16b1101100011110000, 16b1001110001000000},
+    
+    //and
+    {16b1010101010101010, 16b1100110011001100, 16b1000100010001000},
+    //or
+    {16b1010101010101010, 16b1100110011001100, 16b1110111011101110},
+    //xor
+    {16b1010101010101010, 16b1100110011001100, 16b0110011001100110},
+    //ldr ("A")
+    {16b1010101010101010, 16b1100110011001100, 16b1010101010101010},
+    
+    //= cmpeq true
+    {16b1010101010101010, 16b1010101010101010, 16b0000000000000001},
+    //= cmpeq false
+    {16b1010101010101010, 16b1010101010101000, 16b0000000000000000},
+    //< cmplt true
+    {16b0000000000000001, 16b0100000000000000, 16b0000000000000001},
+    //< cmplt false
+    {16b0100000000000000, 16b0000000000000001, 16b0000000000000000},
+    //<= cmple true
+    {16b0100000000000000, 16b0100000000000000, 16b0000000000000001},
+    //<= cmple false
+    {16b0100000000000000, 16b0000000000000001, 16b0000000000000000},
+    
+    //shl
+    {16b0000111100001111, 16b0000000000000011, 16b0111100001111000},
+    //shr
+    {16b0000111100001111, 16b0000000000000011, 16b0000000111100001},
+    //sra
+    {16b0000111100001111, 16b0000000000000011, 16b0000000111100001},
+    //sra
+    {16b1000111100001111, 16b0000000000000011, 16b1111000111100001},
+    //mul
+    {16b0000000010101010, 16b0000000011001100, 16b1000011101111000}
+  };
+  
+  //test case alufn is to store the alufn code provided to the alu
+  //format: {alufn}
+  const TEST_CASE_ALUFN = {
+    {6b000000}, //add
+    {6b000000}, //add
+    {6b000001}, //sub
+    {6b000001}, //sub
+    
+    {6b011000}, //and
+    {6b011110}, //or
+    {6b010110}, //xor
+    {6b011010}, //ldr ("A")
+    
+    {6b110011}, //= cmpeq
+    {6b110011}, //= cmpeq
+    {6b110101}, //< cmplt
+    {6b110101}, //< cmplt
+    {6b110111}, //<= cmple
+    {6b110111}, //<= cmple
+    
+    {6b100000}, //shl
+    {6b100001}, //shr
+    {6b100011}, //sra
+    {6b100011}, //sra
+    {6b100010} //mul
+        
+  };
+  
+  //test case zvn is to check the ZVN outputs of the alu against these values.
+  //T is a boolean to see if we should even check the ZVN, because in some tests we dont actually care about these values
+  //format: {T, Z, V, N}
+  const TEST_CASE_TZVN = {
+    {1, 0, 0, 0}, //add
+    {1, 0, 1, 1}, //add
+    {1, 0, 0, 1}, //sub
+    {1, 0, 1, 1}, //sub
+    
+    //past this point we dont care about zvn
+    {0, 0, 0, 0}, //and
+    {0, 0, 0, 0}, //or
+    {0, 0, 0, 0}, //xor
+    {0, 0, 0, 0}, //ldr ("A")
+    
+    {0, 0, 0, 0}, //= cmpeq
+    {0, 0, 0, 0}, //= cmpeq
+    {0, 0, 0, 0}, //< cmplt
+    {0, 0, 0, 0}, //< cmplt
+    {0, 0, 0, 0}, //<= cmple
+    {0, 0, 0, 0}, //<= cmple
+    
+    {0, 0, 0, 0}, //shl
+    {0, 0, 0, 0}, //shr
+    {0, 0, 0, 0}, //sra
+    {0, 0, 0, 0}, //sra
+    {0, 0, 0, 0} //mul
+    
+  };
+  
+  
+  //how long to wait on each test case before going to the next test case
+  //somewhere 25 is very fast, 29 is probably the most you want to wait.
+  const TEST_CASE_DELAY_TIME = 28;
+  
+  dff test_case_delay[TEST_CASE_DELAY_TIME](.clk(clk), .rst(rst));
+  dff current_test[TestCases.SIZE](.clk(clk), .rst(rst));
+  
+  
+
+  always {
+    
+    //handle states and moving to the next state
+    
+    if(~test_paused){
+      //keep incrementing the delay
+      test_case_delay.d = test_case_delay.q+1;
+      
+      //once the highest bit of the delay reaches 1, we reset the delay
+      if(test_case_delay.q[TEST_CASE_DELAY_TIME-1]){
+        test_case_delay.d = 0;
+        
+        //if we are at the last test case, move back to the first test case
+        //else, keep incrementing through the test cases
+        if(current_test.q +1 >= TestCases.AMOUNT){
+          current_test.d = 0;
+        }
+        else{
+          current_test.d = current_test.q + 1;
+        }
+      }
+    }
+    
+    
+    //in auto mode, the inputs to the alu are driven by the test cases
+    //current test is the value of the current test
+    valueA = TEST_CASE_INOUT[current_test.q][2];
+    valueB = TEST_CASE_INOUT[current_test.q][1];
+    result = TEST_CASE_INOUT[current_test.q][0];
+    
+    
+    alufn = TEST_CASE_ALUFN[current_test.q][0];
+    
+    
+    //the results from the alu are checked against the expected results from the test cases
+    t = TEST_CASE_TZVN[current_test.q][3];
+    z = TEST_CASE_TZVN[current_test.q][2];
+    v = TEST_CASE_TZVN[current_test.q][1];
+    n = TEST_CASE_TZVN[current_test.q][0];
+    
+    
+    current_case = current_test.q;
+    
+    
+  }
+}

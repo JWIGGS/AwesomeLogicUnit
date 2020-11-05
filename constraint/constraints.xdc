@@ -10,5 +10,5 @@ set_property SEVERITY {Warning} [get_drc_checks NSTD-1]
 set_property SEVERITY {Warning} [get_drc_checks UCIO-1]
 set_property BITSTREAM.General.UnconstrainedPins {Allow} [current_design]
 
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets io_button_IBUF[2]]
+
 

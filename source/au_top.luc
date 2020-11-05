@@ -27,13 +27,6 @@ module au_top (
   dff io_button_pressed[5](.clk(clk), .rst(rst));
   dff io_button_ready[5](.clk(clk), .rst(rst));
   var i;
-
-  //constants for buttons
-  const BUTTON_UP = 0;
-  const BUTTON_DOWN = 2;
-  const BUTTON_LEFT = 3;
-  const BUTTON_RIGHT = 4;
-  const BUTTON_MIDDLE = 1;
   
   //---------------------------------------DISPLAY MANAGER---------------------------------------//
   
@@ -60,145 +53,20 @@ module au_top (
   dff store_alufn[6](.clk(clk), .rst(rst));
   dff store_valueOut[16](.clk(clk), .rst(rst));
   
+  //---------------------------------------TEST CASE MANAGER---------------------------------------//
   
+  test_manager test_case(.clk(clk), .rst(rst));
   
-
-
-  //---------------------------------------TEST CASES---------------------------------------//
-  
-  //we encode our test cases into three different variables for 
-  //every row corresponds to the same test case (eg row 2 of every variable corresponds to the 2nd test case)
-  
-  //test case inout is to store the 16 bit values of the 2 inputs and the output that the alu will be checked against
-  //format: {valueA, valueB, result}
-  const TEST_CASE_INOUT = {
-    //add
-    {16b0000000010101010, 16b0000000011111111, 16b0000000110101001},
-    //add overflow
-    {16b0100000000000000, 16b0100000000000000, 16b1000000000000000},
-    //sub
-    {16b0000000010101010, 16b0000000011111111, 16b1111111110101011},
-    //sub overflow
-    {16b111010100110000, 16b1101100011110000, 16b1001110001000000},
-    
-    //and
-    {16b1010101010101010, 16b1100110011001100, 16b1000100010001000},
-    //or
-    {16b1010101010101010, 16b1100110011001100, 16b1110111011101110},
-    //xor
-    {16b1010101010101010, 16b1100110011001100, 16b0110011001100110},
-    //ldr ("A")
-    {16b1010101010101010, 16b1100110011001100, 16b1010101010101010},
-    
-    //= cmpeq true
-    {16b1010101010101010, 16b1010101010101010, 16b0000000000000001},
-    //= cmpeq false
-    {16b1010101010101010, 16b1010101010101000, 16b0000000000000000},
-    //< cmplt true
-    {16b0000000000000001, 16b0100000000000000, 16b0000000000000001},
-    //< cmplt false
-    {16b0100000000000000, 16b0000000000000001, 16b0000000000000000},
-    //<= cmple true
-    {16b0100000000000000, 16b0100000000000000, 16b0000000000000001},
-    //<= cmple false
-    {16b0100000000000000, 16b0000000000000001, 16b0000000000000000},
-    
-    //shl
-    {16b0000111100001111, 16b0000000000000011, 16b0111100001111000},
-    //shr
-    {16b0000111100001111, 16b0000000000000011, 16b0000000111100001},
-    //sra
-    {16b0000111100001111, 16b0000000000000011, 16b0000000111100001},
-    //sra
-    {16b1000111100001111, 16b0000000000000011, 16b1111000111100001},
-    //mul
-    {16b0000000010101010, 16b0000000011001100, 16b1000011101111000}
-  };
-  
-  //test case alufn is to store the alufn code provided to the alu
-  //format: {alufn}
-  const TEST_CASE_ALUFN = {
-    {6b000000}, //add
-    {6b000000}, //add
-    {6b000001}, //sub
-    {6b000001}, //sub
-    
-    {6b011000}, //and
-    {6b011110}, //or
-    {6b010110}, //xor
-    {6b011010}, //ldr ("A")
-    
-    {6b110011}, //= cmpeq
-    {6b110011}, //= cmpeq
-    {6b110101}, //< cmplt
-    {6b110101}, //< cmplt
-    {6b110111}, //<= cmple
-    {6b110111}, //<= cmple
-    
-    {6b100000}, //shl
-    {6b100001}, //shr
-    {6b100011}, //sra
-    {6b100011}, //sra
-    {6b100010} //mul
-        
-  };
-  
-  //test case zvn is to check the ZVN outputs of the alu against these values.
-  //T is a boolean to see if we should even check the ZVN, because in some tests we dont actually care about these values
-  //format: {T, Z, V, N}
-  const TEST_CASE_TZVN = {
-    {1, 0, 0, 0}, //add
-    {1, 0, 1, 1}, //add
-    {1, 0, 0, 1}, //sub
-    {1, 0, 1, 1}, //sub
-    
-    //past this point we dont care about zvn
-    {0, 0, 0, 0}, //and
-    {0, 0, 0, 0}, //or
-    {0, 0, 0, 0}, //xor
-    {0, 0, 0, 0}, //ldr ("A")
-    
-    {0, 0, 0, 0}, //= cmpeq
-    {0, 0, 0, 0}, //= cmpeq
-    {0, 0, 0, 0}, //< cmplt
-    {0, 0, 0, 0}, //< cmplt
-    {0, 0, 0, 0}, //<= cmple
-    {0, 0, 0, 0}, //<= cmple
-    
-    {0, 0, 0, 0}, //shl
-    {0, 0, 0, 0}, //shr
-    {0, 0, 0, 0}, //sra
-    {0, 0, 0, 0}, //sra
-    {0, 0, 0, 0} //mul
-    
-  };
-  
-  
-  //define here the number of test cases provided above
-  const TEST_CASE_AMOUNT = 19;
-  
-  
-  //how long to wait on each test case before going to the next test case
-  //somewhere 25 is very fast, 29 is probably the most you want to wait.
-  const TEST_CASE_DELAY_TIME = 28;
-  
-  dff test_case_delay[TEST_CASE_DELAY_TIME](.clk(clk), .rst(rst));
   dff test_case_paused(.clk(clk), .rst(rst));
-  dff current_test[$clog2(TEST_CASE_AMOUNT)](.clk(clk), .rst(rst));
   
-  //create signal variables to 
+  //create signal variables for checking 
   sig checkResult, checkT, checkZ, checkV, checkN, testPass;
-  
   
   
   
   //---------------------------------------ACTUAL ALU MODULE---------------------------------------//
   
   alu_whole function_alu;
-
-  
-  
-  
   
   
   always {
@@ -218,10 +86,9 @@ module au_top (
     // turn everything off
     led = 8h00;
     io_led = 3x{{8h00}};
-
     
     
-    //---------------------------------------HANDLE BUTTON PRESSES---------------------------------------//
+    //---------------------------------------INPUTS FROM BUTTON PRESSES---------------------------------------//
     
     //handle button presses such that io_button_pressed is set to 1 only at the instant the button is actually pressed
     //this is achieved through a ready stats when the button is not pressed
@@ -241,10 +108,59 @@ module au_top (
         io_button_pressed.d[i] = 0;
       }
     }
+    
+    
+    //---------------------------------------INPUTS FROM BUTTON ACTIONS---------------------------------------//
 
+    //right button press goes to next mode
+    if(io_button_pressed.q[Button.RIGHT]){
+      io_button_pressed.d[Button.RIGHT] = 0;
+      mode.d = mode.q+1;
+    }
+
+    //left button press goes to previous mode
+    if(io_button_pressed.q[Button.LEFT]){
+      io_button_pressed.d[Button.LEFT] = 0;
+      mode.d = mode.q-1;
+    }
+
+    //middle button press
+    if(io_button_pressed.q[Button.MIDDLE]){
+      io_button_pressed.d[Button.MIDDLE] = 0;
+      
+      
+      if(mode.q == 3){
+        //toggle the pause function
+        
+        test_case_paused.d = ~test_case_paused.q;
+        
+      }
+      else{
+        //save value of switches to value A or B
+        case (mode.q){
+          0:
+            store_valueA.d = $flatten(io_dip[2:1]);
+          1:
+            store_valueB.d = $flatten(io_dip[2:1]);
+        }
+  
+        //save value of switches to alufn
+        store_alufn.d = io_dip[0][5:0];
+          
+      }
+        
+    }
+    
+    
+    
+    //---------------------------------------INPUTS FROM TEST CASES---------------------------------------//
+    
+    //feed in the test case whether we are paused or not
+    test_case.test_paused = test_case_paused.q;
 
     
-    //---------------------------------------HANDLE ALU INPUTS---------------------------------------//
+    //---------------------------------------INPUTS FROM ALU---------------------------------------//
+    
     case(mode.q){
         
       3:
@@ -252,21 +168,22 @@ module au_top (
         
         //in auto mode, the inputs to the alu are driven by the test cases
         //current test is the value of the current test
-        function_alu.a = TEST_CASE_INOUT[current_test.q][2];
-        function_alu.b = TEST_CASE_INOUT[current_test.q][1];
-        function_alu.alufn = TEST_CASE_ALUFN[current_test.q][0];
+        function_alu.a = test_case.valueA;
+        function_alu.b = test_case.valueB;
+        function_alu.alufn = test_case.alufn;
         
         
         //pass the test case alufn to the display manager
-        io_display_manager.alufn = TEST_CASE_ALUFN[current_test.q][0];
+        io_display_manager.alufn = test_case.alufn;
         
         //the results from the alu are checked against the expected results from the test cases
-        checkResult = (function_alu.result == TEST_CASE_INOUT[current_test.q][0]);
+        checkResult = (function_alu.result == test_case.result);
         
-        checkT = TEST_CASE_TZVN[current_test.q][3];
-        checkZ = function_alu.z == TEST_CASE_TZVN[current_test.q][2];
-        checkV = function_alu.v == TEST_CASE_TZVN[current_test.q][1];
-        checkN = function_alu.n == TEST_CASE_TZVN[current_test.q][0];
+        //compare the reuslts of the alu ZVN to the test case ZVN
+        checkT = test_case.t;
+        checkZ = function_alu.z == test_case.z;
+        checkV = function_alu.v == test_case.v;
+        checkN = function_alu.n == test_case.n;        
         
         //the results are compiled and sent to the display manager to show PASS or FAIL
         //if check T is true, then the pass check will rely on ZVN checks. if not, then it just relies on the result check.
@@ -285,8 +202,7 @@ module au_top (
         
         //all manual testing modes
         
-        
-        
+
         //pass the stored values of A, B, and alufn into the ALU
         function_alu.a = store_valueA.q;
         function_alu.b = store_valueB.q;
@@ -313,10 +229,8 @@ module au_top (
 
     }
     
- 
-    
 
-    //---------------------------------------HANDLE LED DISPLAY---------------------------------------//
+    //--------------------------------------- OUTPUT LED DISPLAY---------------------------------------//
     
     case(mode.q){
       
@@ -354,14 +268,17 @@ module au_top (
       3:
         //MODE: auto
         //display the current test case as binary on the leds
-        //the display numbers are reversed so as to make it easier when counting the test case
-        io_led[0] = TEST_CASE_AMOUNT - 1 - current_test.q;
+        //the reason we are doing this weird subtraction is because even though our test cases are counting forward,
+        //lucid want to think that the 0th test case is at the bottom of my list, when i want to call 0 to be the top of the list.
+        //so instead of reversing the inputs, we are just reversing the output shown so that it matches...
+        //with the test case we think we are looking at if we count from the top of the list.
+        io_led[0] = TestCases.AMOUNT - 1 - test_case.current_case;
         io_led[1] = testPass? 8hff: 8h00;
         io_led[2] = testPass? 8hff: 8h00;
     }
     
     
-    //---------------------------------------HANDLE DISPLAY MANAGER---------------------------------------//
+    //---------------------------------------OUTPUT DISPLAY MANAGER---------------------------------------//
     
     //our seven segment displays can only be addressed one at a time
     //so in order to assign a value to all of them, we are very quickly looking at each one and giving it a value
@@ -377,12 +294,12 @@ module au_top (
     //the display manager determines the value that we want to show provided a few arguments
     //if display toggle is 1, then the values shown are based on the current mode
     //if display toggle is 1, then the values shown are based on the alufn codes 
-    io_display_manager.displayToggle = io_button[BUTTON_DOWN];
+    io_display_manager.displayToggle = io_button[Button.DOWN];
     io_display_manager.mode = mode.q;
     
     
     //the view ZVN are shown as outputs in the display manager
-    io_display_manager.view_zvn = io_button[BUTTON_UP];
+    io_display_manager.view_zvn = io_button[Button.UP];
     
     //because the segment display is weird, 1 means that the segment is turned off, so we invert (~) the output of the display
     //the segment we are assigning is based on the display counter value such that when a segment is selected, we are writing that value of the segment as well
@@ -391,71 +308,6 @@ module au_top (
 
     
 
-    //---------------------------------------HANDLE BUTTON ACTIONS---------------------------------------//
-
-    //right button press goes to next mode
-    if(io_button_pressed.q[BUTTON_RIGHT]){
-      io_button_pressed.d[BUTTON_RIGHT] = 0;
-      mode.d = mode.q+1;
-    }
-
-    //left button press goes to previous mode
-    if(io_button_pressed.q[BUTTON_LEFT]){
-      io_button_pressed.d[BUTTON_LEFT] = 0;
-      mode.d = mode.q-1;
-    }
-
-    //middle button press
-    if(io_button_pressed.q[BUTTON_MIDDLE]){
-      io_button_pressed.d[BUTTON_MIDDLE] = 0;
-      
-      
-      if(mode.q == 3){
-        //toggle the pause function
-        
-        test_case_paused.d = ~test_case_paused.q;
-        
-      }
-      else{
-        //save value of switches to value A or B
-        case (mode.q){
-          0:
-            store_valueA.d = $flatten(io_dip[2:1]);
-          1:
-            store_valueB.d = $flatten(io_dip[2:1]);
-        }
-  
-        //save value of switches to alufn
-        store_alufn.d = io_dip[0][5:0];
-          
-      }
-        
-    }
-    
-    
-    
-    //---------------------------------------HANDLE AUTOMATIC TEST CASE STATE MACHINE---------------------------------------//
-    
-    
-    //if the test case is not paused
-    if(~test_case_paused.q){
-      //keep incrementing the delay
-      test_case_delay.d = test_case_delay.q+1;
-      
-      //once the highest bit of the delay reaches 1, we reset the delay
-      if(test_case_delay.q[TEST_CASE_DELAY_TIME-1]){
-        test_case_delay.d = 0;
-        
-        //if we are at the last test case, move back to the first test case
-        //else, keep incrementing through the test cases
-        if(current_test.q +1 >= TEST_CASE_AMOUNT){
-          current_test.d = 0;
-        }
-        else{
-          current_test.d = current_test.q + 1;
-        }
-      }
-    }
     
     
     

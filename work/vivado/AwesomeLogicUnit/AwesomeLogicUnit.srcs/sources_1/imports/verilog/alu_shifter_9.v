@@ -4,7 +4,7 @@
    This is a temporary file and any changes made to it will be destroyed.
 */
 
-module alu_shifter_8 (
+module alu_shifter_9 (
     input [15:0] a,
     input [15:0] b,
     input [5:0] alufn,
@@ -16,7 +16,7 @@ module alu_shifter_8 (
   wire [16-1:0] M_function_multiply_result;
   reg [8-1:0] M_function_multiply_a;
   reg [8-1:0] M_function_multiply_b;
-  alu_multiply_10 function_multiply (
+  alu_multiply_11 function_multiply (
     .a(M_function_multiply_a),
     .b(M_function_multiply_b),
     .result(M_function_multiply_result)

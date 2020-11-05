@@ -84,16 +84,17 @@ set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
 read_verilog -library xil_defaultlib {
-  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_adder_6.v
-  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_boolean_7.v
-  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_compare_9.v
-  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_multiply_10.v
-  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_shifter_8.v
-  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_whole_5.v
+  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_adder_7.v
+  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_boolean_8.v
+  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_compare_10.v
+  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_multiply_11.v
+  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_shifter_9.v
+  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/alu_whole_6.v
   C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/counter_2.v
   C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/decoder_3.v
   C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/display_manager_4.v
   C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/reset_conditioner_1.v
+  C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/test_manager_5.v
   C:/Users/user/Documents/alchitry/AwesomeLogicUnit/work/vivado/AwesomeLogicUnit/AwesomeLogicUnit.srcs/sources_1/imports/verilog/au_top_0.v
 }
 OPTRACE "Adding files" END { }

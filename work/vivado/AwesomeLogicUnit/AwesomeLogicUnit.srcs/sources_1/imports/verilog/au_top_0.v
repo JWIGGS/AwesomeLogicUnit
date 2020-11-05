@@ -232,7 +232,7 @@ module au_top_0 (
         io_led[0+7-:8] = M_store_alufn_q;
       end
       2'h3: begin
-        io_led[0+7-:8] = 6'h12 - M_test_case_current_case;
+        io_led[0+7-:8] = 6'h15 - M_test_case_current_case;
         io_led[8+7-:8] = testPass ? 8'hff : 8'h00;
         io_led[16+7-:8] = testPass ? 8'hff : 8'h00;
       end
@@ -247,27 +247,9 @@ module au_top_0 (
   
   always @(posedge clk) begin
     if (rst == 1'b1) begin
-      M_mode_q <= 1'h0;
+      M_store_valueOut_q <= 1'h0;
     end else begin
-      M_mode_q <= M_mode_d;
-    end
-  end
-  
-  
-  always @(posedge clk) begin
-    if (rst == 1'b1) begin
-      M_store_alufn_q <= 1'h0;
-    end else begin
-      M_store_alufn_q <= M_store_alufn_d;
-    end
-  end
-  
-  
-  always @(posedge clk) begin
-    if (rst == 1'b1) begin
-      M_store_valueB_q <= 1'h0;
-    end else begin
-      M_store_valueB_q <= M_store_valueB_d;
+      M_store_valueOut_q <= M_store_valueOut_d;
     end
   end
   
@@ -301,9 +283,9 @@ module au_top_0 (
   
   always @(posedge clk) begin
     if (rst == 1'b1) begin
-      M_store_valueOut_q <= 1'h0;
+      M_store_alufn_q <= 1'h0;
     end else begin
-      M_store_valueOut_q <= M_store_valueOut_d;
+      M_store_alufn_q <= M_store_alufn_d;
     end
   end
   
@@ -313,6 +295,24 @@ module au_top_0 (
       M_store_valueA_q <= 1'h0;
     end else begin
       M_store_valueA_q <= M_store_valueA_d;
+    end
+  end
+  
+  
+  always @(posedge clk) begin
+    if (rst == 1'b1) begin
+      M_mode_q <= 1'h0;
+    end else begin
+      M_mode_q <= M_mode_d;
+    end
+  end
+  
+  
+  always @(posedge clk) begin
+    if (rst == 1'b1) begin
+      M_store_valueB_q <= 1'h0;
+    end else begin
+      M_store_valueB_q <= M_store_valueB_d;
     end
   end
   

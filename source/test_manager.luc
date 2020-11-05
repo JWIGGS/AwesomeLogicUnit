@@ -6,7 +6,7 @@ global TestCases{
   
   
   //define here the number of test cases provided
-  const AMOUNT = 19;
+  const AMOUNT = 22;
 }
 
 module test_manager (
@@ -71,7 +71,15 @@ module test_manager (
     //sra
     {16b1000111100001111, 16b0000000000000011, 16b1111000111100001},
     //mul
-    {16b0000000010101010, 16b0000000011001100, 16b1000011101111000}
+    {16b0000000010101010, 16b0000000011001100, 16b1000011101111000},
+    
+    
+    //sub result fail
+    {16b111010100110000, 16b1101100011110000, 16b1001110001000001},
+    //sub zvn fail
+    {16b111010100110000, 16b1101100011110000, 16b1000000000000000},
+    //and fail
+    {16b1010101010101010, 16b1100110011001100, 16b0000000000000000}
   };
   
   //test case alufn is to store the alufn code provided to the alu
@@ -98,7 +106,11 @@ module test_manager (
     {6b100001}, //shr
     {6b100011}, //sra
     {6b100011}, //sra
-    {6b100010} //mul
+    {6b100010}, //mul
+    
+    {6b000001}, //sub result fail
+    {6b000001}, //sub svn fail
+    {6b011000} //and FAIL
         
   };
   
@@ -128,7 +140,12 @@ module test_manager (
     {0, 0, 0, 0}, //shr
     {0, 0, 0, 0}, //sra
     {0, 0, 0, 0}, //sra
-    {0, 0, 0, 0} //mul
+    {0, 0, 0, 0}, //mul
+    
+    //fail test cases
+    {1, 0, 1, 1}, //sub result fail
+    {1, 1, 0, 0}, //sub zvn fail
+    {0, 0, 0, 0} //and fail (ignored)
     
   };
   

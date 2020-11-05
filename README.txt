@@ -54,6 +54,9 @@ ALUFN codes and abbreviations
 everything else: err
 
 
+Test cases have been outlined in the excel spreadsheet and have been implmented in the same order.
+
+
 
 
 

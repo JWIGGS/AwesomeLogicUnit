@@ -38,8 +38,9 @@ module display_manager (
   const LETTER_DASH = 7b1000000;
   
   always {
-  
-    if(view_zvn && (mode == 1 || mode == 2)){
+    
+    //if we are viewing the zvn and we are in out or auto mode
+    if(view_zvn && mode>=2){
       //if we actually care about the zvn result (what the t variable is), then show the result.
       if(t){
         display_output = {LETTER_, z? LETTER_Z: LETTER_, v? LETTER_V: LETTER_, n? LETTER_N: LETTER_};

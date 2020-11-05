@@ -1,7 +1,7 @@
 Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2020.1 (win64) Build 2902540 Wed May 27 19:54:49 MDT 2020
-| Date             : Thu Nov  5 20:06:25 2020
+| Date             : Thu Nov  5 21:49:26 2020
 | Host             : DESKTOP-OL0AFT4 running 64-bit major release  (build 9200)
 | Command          : report_power -file au_top_0_power_routed.rpt -pb au_top_0_power_summary_routed.pb -rpx au_top_0_power_routed.rpx
 | Design           : au_top_0
@@ -30,7 +30,7 @@ Table of Contents
 ----------
 
 +--------------------------+--------------+
-| Total On-Chip Power (W)  | 0.119        |
+| Total On-Chip Power (W)  | 0.118        |
 | Design Power Budget (W)  | Unspecified* |
 | Power Budget Margin (W)  | NA           |
 | Dynamic (W)              | 0.047        |
@@ -53,16 +53,15 @@ Table of Contents
 | On-Chip        | Power (W) | Used     | Available | Utilization (%) |
 +----------------+-----------+----------+-----------+-----------------+
 | Clocks         |     0.001 |        3 |       --- |             --- |
-| Slice Logic    |     0.002 |      705 |       --- |             --- |
-|   LUT as Logic |     0.002 |      462 |     20800 |            2.22 |
+| Slice Logic    |     0.002 |      740 |       --- |             --- |
+|   LUT as Logic |     0.002 |      494 |     20800 |            2.38 |
 |   CARRY4       |    <0.001 |       32 |      8150 |            0.39 |
 |   Register     |    <0.001 |      119 |     41600 |            0.29 |
-|   F7/F8 Muxes  |    <0.001 |        1 |     32600 |           <0.01 |
 |   Others       |     0.000 |       11 |       --- |             --- |
-| Signals        |     0.003 |      647 |       --- |             --- |
+| Signals        |     0.003 |      681 |       --- |             --- |
 | I/O            |     0.041 |       75 |       170 |           44.12 |
 | Static Power   |     0.072 |          |           |                 |
-| Total          |     0.119 |          |           |                 |
+| Total          |     0.118 |          |           |                 |
 +----------------+-----------+----------+-----------+-----------------+
 
 
@@ -74,7 +73,7 @@ Table of Contents
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
 | Vccint    |       1.000 |     0.016 |       0.006 |      0.010 |       NA    | Unspecified | NA         |
 | Vccaux    |       1.800 |     0.014 |       0.001 |      0.013 |       NA    | Unspecified | NA         |
-| Vcco33    |       3.300 |     0.013 |       0.012 |      0.001 |       NA    | Unspecified | NA         |
+| Vcco33    |       3.300 |     0.012 |       0.011 |      0.001 |       NA    | Unspecified | NA         |
 | Vcco25    |       2.500 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vcco18    |       1.800 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vcco15    |       1.500 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
@@ -138,11 +137,14 @@ Table of Contents
 3.1 By Hierarchy
 ----------------
 
-+-------------+-----------+
-| Name        | Power (W) |
-+-------------+-----------+
-| au_top_0    |     0.047 |
-|   test_case |     0.004 |
-+-------------+-----------+
++-------------------------+-----------+
+| Name                    | Power (W) |
++-------------------------+-----------+
+| au_top_0                |     0.047 |
+|   function_alu          |     0.001 |
+|     function_shifter    |     0.001 |
+|       function_multiply |     0.001 |
+|   test_case             |     0.002 |
++-------------------------+-----------+
 
 

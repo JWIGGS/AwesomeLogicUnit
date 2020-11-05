@@ -21,11 +21,11 @@ module test_manager_5 (
   
   
   
-  localparam TEST_CASE_INOUT = 912'h00aa00ff01a940004000800000aa00ffffab7530d8f09c40aaaacccc8888aaaacccceeeeaaaacccc6666aaaaccccaaaaaaaaaaaa0001aaaaaaa800000001400000014000000100004000400000014000000100000f0f000378780f0f000301e10f0f000301e18f0f0003f1e100aa00cc8778;
+  localparam TEST_CASE_INOUT = 1056'h00aa00ff01a940004000800000aa00ffffab7530d8f09c40aaaacccc8888aaaacccceeeeaaaacccc6666aaaaccccaaaaaaaaaaaa0001aaaaaaa800000001400000014000000100004000400000014000000100000f0f000378780f0f000301e10f0f000301e18f0f0003f1e100aa00cc87787530d8f09c417530d8f08000aaaacccc0000;
   
-  localparam TEST_CASE_ALUFN = 114'h000010587966b3cf5d77de08638e2;
+  localparam TEST_CASE_ALUFN = 132'h00004161e59acf3d75df78218e3881058;
   
-  localparam TEST_CASE_TZVN = 76'h8b9b000000000000000;
+  localparam TEST_CASE_TZVN = 88'h8b9b000000000000000bc0;
   
   localparam TEST_CASE_DELAY_TIME = 5'h1c;
   
@@ -41,7 +41,7 @@ module test_manager_5 (
       M_test_case_delay_d = M_test_case_delay_q + 1'h1;
       if (M_test_case_delay_q[27+0-:1]) begin
         M_test_case_delay_d = 1'h0;
-        if (M_current_test_q + 1'h1 >= 5'h13) begin
+        if (M_current_test_q + 1'h1 >= 5'h16) begin
           M_current_test_d = 1'h0;
         end else begin
           M_current_test_d = M_current_test_q + 1'h1;

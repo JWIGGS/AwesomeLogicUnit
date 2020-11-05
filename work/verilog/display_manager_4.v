@@ -61,7 +61,7 @@ module display_manager_4 (
   localparam LETTER_DASH = 7'h40;
   
   always @* begin
-    if (view_zvn && (mode == 1'h1 || mode == 2'h2)) begin
+    if (view_zvn && mode >= 2'h2) begin
       if (t) begin
         display_output = {7'h00, z ? 7'h5b : 7'h00, v ? 7'h3e : 7'h00, n ? 7'h54 : 7'h00};
       end else begin
